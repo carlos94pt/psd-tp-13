@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "NURUPE <br>Realizado por:<br><ul><li><p>Nuno Moreira</p></li>Rui Rebelo<li><p></p></li><li><p>Pedro Oliveira</p></li></ul>",
+    "description": "NURUPE <br>Realizado por:<br><ul><li><p>Carlos Garcia</p></li>José Alves<li><p>",
     "version": "1.3.0",
     "title": "Gerir parque de veiculos"
   },

@@ -21,7 +21,7 @@ const utilizadorSchema = new Schema({
     dadosPassword : {
         type : { hash: String,
             salt: String },
-        required: true 
+        required: true
     },
     tipo : {
         type : Number,

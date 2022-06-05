@@ -3,7 +3,6 @@
 const mongoose = require("mongoose");
 const Utilizador = mongoose.model("Utilizador");
 const Parque = mongoose.model("Parque");
-const Veiculo = mongoose.model("Veiculo");
 
 module.exports = {
     //Obter id do utilizador a partir do JWT
@@ -28,43 +27,21 @@ module.exports = {
         }
     },
 
-    verificarDadosSaida: (idParque, matricula, idUtilizador) => {
+    verificarDadosEntrada: (idParque, idUtilizador) => {
         const zonaCheck = new Promise((resolve, reject) => {
             Parque.exists({ _id: idParque })
                 .then((res) => {
                     if (res) {
                         resolve(res);
                     } else {
-                        reject("Erro zona inválida");
+                        reject("Erro Parque inválido");
                     }
                 })
                 .catch((err) => {
-                    reject("Erro id da zona mal formatado");
+                    reject("Erro id Parque mal formatado");
                 });
         });
-        const veiculoCheck = new Promise((resolve, reject) => {
-            Veiculo.findById(matricula)
-                .then((res) => {
-                    if (res) {
-                        if (res.estado == 0) {
-                            if (idParque == res.zonaAtual) {
-                                resolve(true);
-                            } else {
-                                reject(
-                                    "Zona atual do veiculo é diferente da zona de saida"
-                                );
-                            }
-                        } else {
-                            reject("Veiculo já alugado");
-                        }
-                    } else {
-                        reject("Erro veiculo inválido");
-                    }
-                })
-                .catch((err) => {
-                    reject("Erro id do veiculo mal formatado");
-                });
-        });
+
         const utilizadorCheck = new Promise((resolve, reject) => {
             Utilizador.exists({ _id: idUtilizador })
                 .then((res) => {
@@ -78,35 +55,22 @@ module.exports = {
                     reject("Erro id do utilizador mal formatado");
                 });
         });
-        return Promise.all([zonaCheck, veiculoCheck, utilizadorCheck]);
+        return Promise.all([zonaCheck, utilizadorCheck]);
     },
-    verificarDadosEntrada: (idParque, idVeiculo) => {
+    verificarDadosSaida: (idParque) => {
         const zonaCheck = new Promise((resolve, reject) => {
             Parque.exists({ _id: idParque })
                 .then((res) => {
                     if (res) {
                         resolve(res);
                     } else {
-                        reject("Erro zona inválida");
+                        reject("Erro Parque inválido");
                     }
                 })
                 .catch((err) => {
-                    reject("Erro id da zona mal formatado");
+                    reject("Erro id Parque mal formatado");
                 });
         });
-        const veiculoCheck = new Promise((resolve, reject) => {
-            Veiculo.exists({ _id: idVeiculo })
-                .then((res) => {
-                    if (res) {
-                        resolve(res);
-                    } else {
-                        reject("Erro veiculo inválido");
-                    }
-                })
-                .catch((err) => {
-                    reject("Erro id do veiculo mal formatado");
-                });
-        });
-        return Promise.all([zonaCheck, veiculoCheck]);
+        return Promise.all([zonaCheck]);
     },
 };

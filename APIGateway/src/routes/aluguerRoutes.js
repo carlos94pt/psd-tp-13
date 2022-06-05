@@ -1,7 +1,12 @@
 "use strict";
+const jwt = require("jsonwebtoken");
 module.exports = function (auth, app) {
    const aluguerCtrl = require("../controllers/aluguerController");
    // -- rota  /registar    métodos: POST
-   app.route("/entrada").post(auth, aluguerCtrl.registar_entrada_veiculo);
-   app.route("/saida").post(auth, aluguerCtrl.registar_saida_veiculo);
+   app.route("/historico").get(auth, aluguerCtrl.obter_aluguer);
+   app.route("/entrada").post(auth,aluguerCtrl.entrada);
+   app.route("/saida").post(auth,aluguerCtrl.saida);
+   app.route("/ativos").get(auth, aluguerCtrl.todos);
+
+
 };

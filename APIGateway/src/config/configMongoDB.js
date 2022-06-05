@@ -16,7 +16,7 @@ const URL_DBLOCALHOST = `mongodb://${process.env.DBLOCALHOST}/${DB}`
 const URL_DBATLAS = `mongodb+srv://${process.env.DBATLAS}/${DB}?retryWrites=true&w=majority`
 
 const mongodb = {
-    pathLocalhost: "mongodb://127.0.0.1/projetosd",
+    pathLocalhost: "mongodb://127.0.0.1/db_evento", // 'mongodb://127.0.0.1/db_evento',
     pathAtlas: URL_DBATLAS // 'mongodb+srv://aluno:ulPortoEI@cluster0.urlod.mongodb.net/BDAtividadeAula07?retryWrites=true&w=majority'
 };
 

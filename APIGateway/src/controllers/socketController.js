@@ -1,6 +1,6 @@
 "use strict";
 
-const aluguerCtrl = require("./aluguerController");
+const aluguerCtrl = require("../controllers/aluguerController");
 
 const errorCallbackFunction = (err) => {
    console.log("Erro de conexão");
@@ -14,46 +14,47 @@ const dataCallbackFunction = (data, connection) => {
    const mensagem = JSON.parse(data);
    switch (mensagem.tipo) {
       case 1:
-         if (mensagem.matricula && mensagem.parqueId) {
+         if (mensagem.matricula && mensagem.parqueId && mensagem.utilizadorId) {
             connection.write(
-               JSON.stringify({
-                  tipo: 3,
-                  message: "A processar...",
-               })
+                JSON.stringify({
+                   tipo: 3,
+                   message: "A processar...",
+                })
             );
-            aluguerCtrl.registar_saida_veiculo(
-               mensagem.matricula,
-               mensagem.parqueId,
-               connection
+            aluguerCtrl.registar_entrada_veiculo(
+                mensagem.matricula,
+                mensagem.parqueId,
+                mensagem.utilizadorId,
+                connection
             );
          } else {
             connection.write(
-               JSON.stringify({
-                  tipo: 2,
-                  message: "Saida de veiculo, dados inválidos",
-               })
+                JSON.stringify({
+                   tipo: 2,
+                   message: "Saída, dados estão inválidos",
+                })
             );
          }
          break;
       case 2:
          if (mensagem.matricula && mensagem.parqueId) {
             connection.write(
-               JSON.stringify({
-                  tipo: 3,
-                  message: "A processar...",
-               })
+                JSON.stringify({
+                   tipo: 3,
+                   message: "Em operação...",
+                })
             );
-            aluguerCtrl.registar_entrada_veiculo(
-               mensagem.matricula,
-               mensagem.parqueId,
-               connection
+            aluguerCtrl.registar_saida_veiculo(
+                mensagem.matricula,
+                mensagem.parqueId,
+                connection
             );
          } else {
             connection.write(
-               JSON.stringify({
-                  tipo: 2,
-                  message: "Entrada de veiculo, dados inválidos",
-               })
+                JSON.stringify({
+                   tipo: 2,
+                   message: "Entrada, dados estão inválidos",
+                })
             );
          }
          break;

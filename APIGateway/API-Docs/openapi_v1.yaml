@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: >-
-    NURUPE <br>Realizado por:<br><ul><li><p>Nuno Moreira</p></li><li><p>Pedro Oliveira</p></li><li><p>Rui rebelo</p></li></ul>
+    ParkHere <br>Realizado por:<br><ul><li><p>Carlos Garica</p></li><li><p>José Alves</p>
   version: 1.3.0
   title: Gerir parques
 servers:

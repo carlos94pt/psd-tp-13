@@ -15,11 +15,11 @@ module.exports = function (auth, app) {
    app.route('/login')
        .post(utilizadorCtrl.autenticar);
 
-  // app.route("/verificarToken").get(auth, utilizadorCtrl.verificar_token);
+   // app.route("/verificarToken").get(auth, utilizadorCtrl.verificar_token);
 
    //app.route("/utilizador").get(auth, utilizadorCtrl.obter_utilizador);
 
-   
+
 
 
 
@@ -31,6 +31,7 @@ module.exports = function (auth, app) {
             return res.status(401).send("Token invalido")
          }
          else {
+            req.id = decoded._id;
             req.username = decoded.username
             console.log(req.username = decoded.username);
             req.email=decoded.email
@@ -45,8 +46,8 @@ module.exports = function (auth, app) {
 
    app.get('/utilizador', utilizador, (req, res, next) => {
       console.log("Retornou utilizadores!");
-      console.log(req.tipo);
-      res.json([{username:req.username,email:req.email,tipo:req.tipo,nome: req.nome}]);
+      console.log(req.id);
+      res.json([{id:req.id, username:req.username,email:req.email,tipo:req.tipo,nome: req.nome}]);
    })
 
    app.route("/saldo")

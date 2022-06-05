@@ -3,27 +3,30 @@
 const mongoose = require("mongoose");
 const util = require("./util.js");
 const Aluguer =  require('../models/aluguerModel.js');
-const Veiculo =  require('../models/veiculoModel.js');
 const Parque =  require('../models/parqueModel.js');
 
-exports.registar_saida_veiculo = (
+var valorAA = 0.90
+var valorBB = 0.50
+var valorCC = 0.30
+
+exports.registar_entrada_veiculo = (
     matricula,
     idParque,
     idUtilizador,
     connection
 ) => {
-    let verificarDados = util.verificarDadosSaida(
-        matricula,
+    let verificarDados = util.verificarDadosEntrada(
         idParque,
         idUtilizador
     );
     verificarDados
         .then(() => {
-            const aluguer = new Aluguer();
-            aluguer.cliente = mongoose.Types.ObjectId(idUtilizador);
-            aluguer.veiculo = mongoose.Types.ObjectId(matricula);
-            aluguer.zonaSaida = mongoose.Types.ObjectId(idParque);
-            aluguer.save((err) => {
+            const esta= new Aluguer();
+            esta.cliente = mongoose.Types.ObjectId(idUtilizador);
+            esta.matricula = matricula;
+            esta.parque = mongoose.Types.ObjectId(idParque);
+            esta.horaInicio = new Date();
+            esta.save((err) => {
                 if (err) {
                     connection.write(
                         JSON.stringify({
@@ -32,13 +35,10 @@ exports.registar_saida_veiculo = (
                         })
                     );
                 } else {
-                    Veiculo.findById(matricula, (err, veiculo) => {
-                        veiculo.setEstado(1);
-                    });
                     connection.write(
                         JSON.stringify({
                             tipo: 1,
-                            message: "Aluguer registado",
+                            message: "Entrada no parque foi registada com sucesso!",
                         })
                     );
                 }
@@ -49,39 +49,55 @@ exports.registar_saida_veiculo = (
         });
 };
 
-exports.registar_entrada_veiculo = (matricula, idParque, connection) => {
-    let verificarDados = util.verificarDadosEntrada(idParque, matricula);
+exports.registar_saida_veiculo = (matricula, idParque, connection) => {
+    let verificarDados = util.verificarDadosSaida(idParque);
     verificarDados
         .then(() => {
             let condition = {
-                veiculo: mongoose.Types.ObjectId(matricula),
-                horaFim: null,
-                parqueEntrada: null,
+                matricula: matricula,
+                horaFim: null
             };
             Aluguer.findOne(condition)
-                .populate("veiculo")
                 .populate("cliente")
                 .exec((err, result) => {
                     if (err || !result) {
                         connection.write(
                             JSON.stringify({
                                 tipo: 2,
-                                message: "Erro ao encontrar aluguer",
+                                message: "Erro ao encontrar o seu histórico",
                             })
                         );
                     } else {
                         result.horaFim = Date.now();
-                        result.zonaEntrega = mongoose.Types.ObjectId(idParque);
 
-                        const numDias =
-                            (result.horaFim - result.horaInicio) /
-                            (1000 * 60 * 60 * 24);
-                        result.valorFinal =
-                            result.veiculo.valorDia * Math.ceil(numDias);
+                        const numHoras = (result.horaFim - result.horaInicio) / (1000 * 60 * 60 * 24);
+                        var minutos = numHoras*60
 
-                        const saldo = result.cliente.updateSaldo(
-                            result.veiculo.valorDia * Math.ceil(numDias)
-                        );
+                        if(numHoras < 1){
+                            var i = minutos
+                            while(i>0){
+                                result.valorFinal += valorAA
+                                i-=15
+                            }
+                        }else if(numHoras <=2 && numHoras>=1){
+                            var i = minutos
+                            result.valorFinal = valorAA*4
+                            i-=60
+                            while(i>0){
+                                result.valorFinal += valorBB
+                                i-=15
+                            }
+                        }else{
+                            var i = minutos
+                            result.valorFinal = valorAA*4 + valorBB*4
+                            i-=120
+                            while(i>0){
+                                result.valorFinal += valorCC
+                                i-=15
+                            }
+                        }
+
+                        //const saldo = result.cliente.updateSaldo(result.valorFinal);
                         result.save((err) => {
                             if (err) {
                                 connection.write(
@@ -91,14 +107,10 @@ exports.registar_entrada_veiculo = (matricula, idParque, connection) => {
                                     })
                                 );
                             } else {
-                                result.veiculo.registarEntrada(
-                                    0,
-                                    mongoose.Types.ObjectId(idParque)
-                                );
                                 connection.write(
                                     JSON.stringify({
                                         tipo: 1,
-                                        message: "Veiculo entregue com sucesso. " + saldo,
+                                        message: "Saída do parque executada com sucesso. ",
                                     })
                                 );
                             }
@@ -120,12 +132,110 @@ exports.obter_aluguer = (req, res) => {
             horaFim: { $ne: null },
         };
         Aluguer.find(condicao)
-            .populate("veiculo")
+            .populate("parque")
             .exec((err, result) => {
                 if (err)
                     return res
                         .status(404)
-                        .json({ message: "Aluguer não encontrado" });
+                        .json({ message: "Parque não encontrado" });
+                res.status(200).json(result);
+            });
+    });
+};
+
+exports.entrada = (req, res) => {
+    util.obterUtilizador(req, res, (req, res, utilizador) => {
+        if (!utilizador)
+            return res.status(404).json({message: "Utilizador não encontrado"});
+        const esta= new Aluguer();
+        esta.cliente = mongoose.Types.ObjectId(utilizador._id);
+        esta.matricula = req.body.matricula;
+        esta.parque = mongoose.Types.ObjectId(req.body.idParque);
+        esta.horaInicio = new Date();
+        esta.save((err) => {
+            if (err) {
+                res.status(404).json({
+                    message:"Erro ao gravar"
+                })
+            } else {
+                res.status(200).json({
+                    aluguerId: esta._id,
+                    message:"Entrada com sucesso!"
+                })
+            }
+        });
+
+    })
+}
+
+exports.saida = (req, res) => {
+    util.obterUtilizador(req, res, async (req, res, utilizador) => {
+        if (!utilizador)
+            return res.status(404).json({message: "Utilizador não encontrado"});
+        const esta = await Aluguer.findById(req.body.aluguerId)
+        if (esta) {
+            esta.horaFim = Date.now();
+
+            const numHoras = (esta.horaFim - esta.horaInicio) / (1000 * 60 * 60 * 24);
+            var minutos = numHoras*60
+
+            if(numHoras < 1){
+                var i = minutos
+                while(i>0){
+                    esta.valorFinal += valorAA
+                    i-=15
+                }
+            }else if(numHoras <=2 && numHoras>=1){
+                var i = minutos
+                esta.valorFinal = valorAA*4
+                i-=60
+                while(i>0){
+                    esta.valorFinal += valorBB
+                    i-=15
+                }
+            }else{
+                var i = minutos
+                esta.valorFinal = valorAA*4 + valorBB*4
+                i-=120
+                while(i>0){
+                    esta.valorFinal += valorCC
+                    i-=15
+                }
+            }
+            await esta.save()
+            res.status(200).json({
+                message: "Saída efetuada com sucesso!",
+                total: esta.valorFinal
+            })
+
+        } else {
+            res.status(404).json({
+                message: "Erro na pesquisa"
+            })
+        }
+
+    })
+
+
+
+}
+
+exports.todos = (req, res) => {
+    util.obterUtilizador(req, res, (req, res, utilizador) => {
+        if (!utilizador)
+            return res.status(404).json({ message: "Utilizador não encontrado" });
+        const condicao = {
+            cliente: utilizador._id,
+            horaFim: { $eq: null },
+            valorFim: {$eq: 0}
+        };
+        Aluguer.find(condicao)
+            .populate("parque")
+            .exec((err, result) => {
+                if (err)
+                    return res
+                        .status(404)
+                        .json({ message: "Parque não encontrado" });
                 res.status(200).json(result);
             });
     });

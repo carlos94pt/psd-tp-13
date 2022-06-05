@@ -87,13 +87,13 @@ exports.criar_parque = (req, res) => {
             } else {
                res.status(200).json({
                   tipo: "sucesso",
-                  message: "Parque criado",
+                  message: "Parque criado com sucesso!",
                });
             }
          });
       } else {
          res.status(401).json({
-            message: "Não está autorizado a criar parques",
+            message: "Não tem autorização para criar parques",
          });
       }
    });

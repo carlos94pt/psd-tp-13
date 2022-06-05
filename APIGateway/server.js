@@ -1,10 +1,4 @@
-/**
- *  ULP - Eng Informática (2021-22)
- *  Programação de Sistemas Distribuídos
- *  DATA: 09-05-2022 (para aula 10)
- *
- *  Autenticação e Autorização com token JWT
- */
+
 
  const express = require('express')
  const cors = require('cors')
@@ -29,13 +23,13 @@
  const UtilizadorModel =  require('./src/models/utilizadorModel');
  const ParqueModel =  require('./src/models/parqueModel');
  const AluguerModel =  require('./src/models/aluguerModel');
- const VeiculoModel = require('./src/models/veiculoModel');
+
  
  
  const UtilizadorRoutes =  require('./src/routes/utilizadorRoutes');
  const AluguerRoutes =  require('./src/routes/aluguerRoutes');
  const ParqueRoutes =  require('./src/routes/parqueRoutes');
- const VeiculoRoutes =  require('./src/routes/veiculosRoutes');
+
  
  
  
@@ -96,7 +90,7 @@
  UtilizadorRoutes(autenticacao, app);
  ParqueRoutes(autenticacao, app);
  AluguerRoutes(autenticacao, app);
- VeiculoRoutes(autenticacao, app);
+
  
  
  
